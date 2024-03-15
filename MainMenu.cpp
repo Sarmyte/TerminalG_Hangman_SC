@@ -16,23 +16,38 @@ using namespace std;
 	string wordsT[2] =
 	{"Animal", "Food"};
 
+//Word Storages.
+	int wordSH; //Stores word size.
+	string wordTH, wordH; //Stores word type, //Stores the word.
+	string wordMasked; //Stores a Masked word.
+	char letter; //Stores guessed letters.
+	string failedLetters; //Stores in a string to showcase failed guesses.
+	bool wasGuessed = false; //Checks if the letter has already been guessed
+
 //Creating Variables: World Variables.
 	int wdbRows = sizeof(wordsDB) / sizeof(wordsDB[0]); //Row Size.
 	int wdbCols = sizeof(wordsDB[0]) / sizeof(wordsDB[0][0]); //Col Size.
 	int option = 0; //Used on SCases on Menus.
 	int cont = 0; //Used for Counting.
 	
-//Word Storages.
-	int wordSH; //Stores word size.
-	string wordTH, wordH; //Stores word type, //Stores the word.
-	string wordMasked; //Stores a Masked word.
-	char letter; //Stores guessed letters.
-
 
 //Function: Cleaning Screen.
 void fSCleaner()
 {
 	system("CLS");
+}
+
+void  fWrongGuessDisplay()
+{
+	cout << "Wrong guesses: ";
+	if(failedLetters.size() > 0)
+	{
+		for (cont = 0; cont < failedLetters.size(); cont++)
+		{
+			cout << failedLetters[cont] << ", ";
+		}
+	}
+	cout << "\n";
 }
 
 //Function: Word Reveal
@@ -69,12 +84,6 @@ int fWordSize()
 	return wordSH = wordH.size();
 }
 
-//Function: Choosing a type of Word.
-string fChooseWType()
-{
-	int randomCol = rand() % wdbCols;
-	return wordH = wordsDB[option - 1][randomCol], wordTH = wordsT[option - 1];
-}
 
 //Function: Generating a random Word.
 string fRandomWord()
@@ -84,38 +93,49 @@ string fRandomWord()
 	return wordH = wordsDB[randomRow][randomCol], wordTH = wordsT[randomRow];
 }
 
+//Function: Choosing a type of Word.
+string fChooseWType()
+{
+	int randomCol = rand() % wdbCols;
+	return wordH = wordsDB[option - 1][randomCol], wordTH = wordsT[option - 1];
+}
+
 //Function: Game Screen
 void fGameScreen()
 {
 	int chancesUsed = 0, chancesMax = wordSH * 2;
 	while (chancesMax - chancesUsed > 0)
 	{
-		cout << "GAME ON!\n";
-		cout << "You can guess a Letter or the entire word.\n";
-		cout << "Your word is a " << wordTH << " with " << wordSH << " letters\n\n";
-		cout << "Remaining Guesses: " << chancesMax - chancesUsed << "\n\n";
-		cout << "Word: " << fWordMask() << "\n";
-		cout << "Guess: ";
-		cin >> letter;
-		chancesUsed++;
-		fWordReveal();
-		fSCleaner();
-		if (fWordReveal() == wordH || chancesMax - chancesUsed == 0)
+		if (fWordReveal() == wordH)
 		{
 			break;
 		}
-	}
-	if (fWordReveal() == wordH)
-	{
+		else
+		{
+			cout << "GAME ON!\n";
+			cout << "You can guess a Letter or the entire word.\n";
+			cout << "Your word is a " << wordTH << " with " << wordSH << " letters\n\n";
+			cout << "Remaining Guesses: " << chancesMax - chancesUsed << "\n";
+			fWrongGuessDisplay();
+			cout << "Word: " << fWordMask() << "\n";
+			cout << "Guess: ";
+			cin >> letter;
+			chancesUsed++;
+			fWordReveal();
 			fSCleaner();
-			cout << "!CONGRATULATIONS!\n";
-			cout << "!!!!!YOU WON!!!!!\n\n";
+		}
 	}
-	else
+	if (chancesMax - chancesUsed == 0)
 	{
 		fSCleaner();
 		cout << "!BETTER LUCK NEXT TIME!\n";
 		cout << "!!!!!!!!YOU LOST!!!!!!!\n\n";
+	}
+	if (fWordReveal() == wordH)
+	{
+		fSCleaner();
+		cout << "!CONGRATULATIONS!\n";
+		cout << "!!!!!YOU WON!!!!!\n\n";
 	}
 }
 
