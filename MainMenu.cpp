@@ -7,9 +7,10 @@
 using namespace std;
 
 //Creating Variables: Words Database.
-	string wordsDB[2][10] =
-	{
-		{"Cat", "Bear", "Camel", "Donkey", "Rabbit", "Zebra", "Deer", "Squirrel", "Horse", "Cheetah"}, //Row1
+string wordsDB[2][10] =
+{
+		{"Deer"},
+		//{"Cat", "Bear", "Camel", "Donkey", "Rabbit", "Zebra", "Deer", "Squirrel", "Horse", "Cheetah"}, //Row1
 		{"Puding", "Pasta", "Cheese", "Sandwich", "Yogurt", "Kebab", "Pancake", "Pizza", "Seafood", "Rice"} //Row2
 	};
 //Creating Variables: Word Types.
@@ -22,7 +23,7 @@ using namespace std;
 	string wordMasked; //Stores a Masked word.
 	char letter; //Stores guessed letters.
 	string failedLetters; //Stores in a string to showcase failed guesses.
-	bool wasGuessed = false; //Checks if the letter has already been guessed
+	bool isInWord = false, isInMask = false, isInFailed = false; //Checks if the letter has already been guessed
 
 //Creating Variables: World Variables.
 	int wdbRows = sizeof(wordsDB) / sizeof(wordsDB[0]); //Row Size.
@@ -50,10 +51,10 @@ void  fWrongGuessDisplay()
 	cout << "\n";
 }
 
-//Function: Word Reveal
+//Function: Unmasking wordMask
 string fWordReveal()
 {
-	for (cont = 0; cont < wordSH; cont++)
+	for (cont = 0; cont < wordH.size(); cont++)
 	{
 		if (wordH[cont] == letter)
 		{
@@ -67,9 +68,9 @@ string fWordReveal()
 string fWordMask()
 {
 	cont = 0;
-	if (wordMasked.size() < wordSH)
+	if (wordMasked.size() < wordH.size())
 	{
-		while (cont < wordSH)
+		while (cont < wordH.size())
 		{
 			wordMasked += "_";
 			cont++;
@@ -77,13 +78,6 @@ string fWordMask()
 	}
 	return wordMasked;
 }
-
-//Function: Getting Word Size
-int fWordSize()
-{
-	return wordSH = wordH.size();
-}
-
 
 //Function: Generating a random Word.
 string fRandomWord()
@@ -103,34 +97,85 @@ string fChooseWType()
 //Function: Game Screen
 void fGameScreen()
 {
-	int chancesUsed = 0, chancesMax = wordSH * 2;
-	while (chancesMax - chancesUsed > 0)
+	int chancesRemaining = wordH.size() * 2;
+	while (chancesRemaining > 0)
 	{
-		if (fWordReveal() == wordH)
+		cout << "GAME ON!\n";
+		cout << "You can guess a Letter or the entire word.\n";
+		cout << "Your word is a " << wordTH << " with " << wordH.size() << " letters\n\n";
+		cout << "Remaining Guesses: " << chancesRemaining << "\n";
+		fWrongGuessDisplay();
+		cout << "Word: " << fWordMask() << "\n";
+		cout << "Guess: ";
+		cin >> letter;
+
+		cont = 0;
+		while (cont < wordH.size())
 		{
-			break;
+			if (letter == wordH[cont])
+			{
+				cout << "vezes in word\n";
+				isInWord = true;
+			}
+			cont++;
+		}
+
+		if (isInWord == true)
+		{
+			cont = 0;
+			while (cont < wordMasked.size())
+			{
+				if (letter == wordMasked[cont])
+				{
+					cout << "vezes in Mask\n";
+					isInMask = true;
+				}
+				cont++;
+			}
 		}
 		else
 		{
-			cout << "GAME ON!\n";
-			cout << "You can guess a Letter or the entire word.\n";
-			cout << "Your word is a " << wordTH << " with " << wordSH << " letters\n\n";
-			cout << "Remaining Guesses: " << chancesMax - chancesUsed << "\n";
-			fWrongGuessDisplay();
-			cout << "Word: " << fWordMask() << "\n";
-			cout << "Guess: ";
-			cin >> letter;
-			chancesUsed++;
-			fWordReveal();
-			fSCleaner();
+			cont = 0;
+			while (cont < failedLetters.size() + 1)
+			{
+				if (letter == failedLetters[cont])
+				{
+					cout << "vezes not in failed\n";
+					isInFailed = true;
+				}
+				cont++;
+			}
 		}
+
+		if (isInMask == false)
+		{
+			cout << "vezes in Mask2\n";
+			fWordReveal();
+			chancesRemaining--;
+		}
+
+		if (isInFailed == false)
+		{
+			cout << "vezes in failed2\n";
+			failedLetters += letter;
+			chancesRemaining--;
+		}
+
+
+
+
+
+
+			fSCleaner();
 	}
-	if (chancesMax - chancesUsed == 0)
-	{
+	//Loss Condition
+	if (chancesRemaining == 0)
+		{
 		fSCleaner();
 		cout << "!BETTER LUCK NEXT TIME!\n";
 		cout << "!!!!!!!!YOU LOST!!!!!!!\n\n";
-	}
+		}
+	//Win Condition
 	if (fWordReveal() == wordH)
 	{
 		fSCleaner();
@@ -160,19 +205,16 @@ void fPlaySoloMenu()
 		case 1:
 			fSCleaner();
 			fChooseWType();
-			fWordSize();
 			fGameScreen();
 			break;
 		case 2:
 			fSCleaner();
 			fChooseWType();
-			fWordSize();
 			fGameScreen();
 			break;
 		case 3:
 			fSCleaner();
 			fRandomWord();
-			fWordSize();
 			fGameScreen();
 			break;
 		}
